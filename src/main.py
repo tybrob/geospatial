@@ -91,13 +91,10 @@ def textual_query(df:pd.DataFrame, word_partitions:pd.DataFrame, query_keywords:
     for partition in common_partitions:
         vi = word_partitions.iloc[partition].get("keywords").split("| ")
         minscore = calculate_minscore(query_keywords,vi,v,t)
-        print(minscore)
         maxscore = calculate_maxscore(query_keywords,vi,t)
-        print(maxscore)
         (low,high) = calculate_iDistance_textual_values(partition,c, minscore, maxscore)
-        print(low)
-        print(high)
-        pd.concat([target_df,get_points_based_on_textual_iDistance(df,low,high)])
+        df_c = get_points_based_on_textual_iDistance(df,low,high)
+        target_df = pd.concat([target_df,get_points_based_on_textual_iDistance(df,low,high)])
 
     return target_df
         
@@ -169,7 +166,7 @@ def get_points_based_on_textual_iDistance(df, low, high):
 if __name__ == '__main__':
 
     #resthotNA hotel
-    file_name = 'hotel'
+    file_name = 'resthotNA'
     dict_of_c_values = {'resthotNA':1.3565018881567229E7, 'hotel': 3632.663528619724}
     final_format_hotel = pd.read_csv(f"../data/{file_name}_FinalFormat.txt", sep="|")
 
@@ -181,17 +178,21 @@ if __name__ == '__main__':
     #sys.exit()
 
     #query parameters
-    query_spatial = {'x':2134.436174245782,
-                     'y':6543.7859924045315}
-    r = 1000.23
-    query_textual = {"water sport facilities (on site)", "family rooms", "squash"}
-    t = 0.2
+    query_spatial = {'x':1134.436174245782,
+                     'y':20324.7859924045315}
+    r = 10000000.23
+    query_textual = {"ski school","skiing","hiking","express check-in/check-out","private check-in/check-out","honeymoon suite","non-smoking rooms","family rooms","english","gyros"}
+    t = 0.1
 
     spatial_points = spatial_query(final_format_hotel, reference_points,dict_of_c_values[file_name],query_spatial,r)
     print(len(spatial_points))
     #TODO try with different query parameters
     textual_points = textual_query(spatial_points, word_partitions, query_textual, t, 1.01)
     print(len(textual_points))
+
+    print(textual_points['a'].drop_duplicates().sort_values().to_string())
+
+    #TODO retrieve the intervals and perform the window queries
 
     #_, ax = plt.subplots()
 
